@@ -1,3 +1,7 @@
 # architectural-design-unit-3
 
-![](docs/AD3_Arduino_Session-1-Handout.pdf)
+<object data="docs/AD3_Arduino_Session-1-Handout.pdf" type="application/pdf" width="700px" height="700px">
+    <embed src="docs/AD3_Arduino_Session-1-Handout.pdf">
+        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="docs/AD3_Arduino_Session-1-Handout.pdf">Download PDF</a>.</p>
+    </embed>
+</object>
