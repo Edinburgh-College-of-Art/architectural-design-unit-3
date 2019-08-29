@@ -1,8 +1,15 @@
 # Architectural Design 3: Unit 3
 
-## Handouts
+## Intro
 
--   [Session 1](docs/AD3-Arduino-Session-1-Handout.pdf)
--   [Session 2](docs/AD3-Arduino-Session-2-Handout.pdf)
--   [Session 3](docs/AD3-Arduino-Session-3-Handout.pdf)
--   [Session 4](docs/AD3-Arduino-Session-4-Handout.pdf)
+For setting up to use Arduino and some helpful info, see the [course setup page](https://edinburgh-college-of-art.github.io/repos/ad3/).
+
+## Contents
+
+- **Examples**
+
+    Simple examples for getting to grips with the Arduno platform. Requested sample code will appear here.
+
+- **FireFly Firmata**
+
+    To communicate between FirFly and the Arduino, upload the Firefly Firmata to your Arduino.
