@@ -2,7 +2,7 @@
 
 ## Intro
 
-For setting up to use Arduino and some helpful info, see the [course setup page](https://edinburgh-college-of-art.github.io/repos/ad3/).
+For setting up to use Arduino and some helpful info, see the [course setup page](https://edinburgh-college-of-art.github.io/courses/ad3/).
 
 ## Contents
 
