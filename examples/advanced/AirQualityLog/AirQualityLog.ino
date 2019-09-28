@@ -2,30 +2,31 @@
    edited by Henri Lacoste for AD3 at UoE.
    This code is in the public domain.
 */
+//------------------------------------------------------------------------------
 #include"AirQuality.h"
 #include"Arduino.h"
 #include <SPI.h>
 #include <SD.h>
 #include <DS3231.h>
+//------------------------------------------------------------------------------
 AirQuality airqualitysensor;
-
-DS3231 rtc(SDA, SCL);
-
 const int airQualityPin = A0;      // Analog input pin that the LDR is attached to
+//------------------------------------------------------------------------------
+DS3231 rtc(SDA, SCL);
+//------------------------------------------------------------------------------
 #define FILE_BASE_NAME "Data"    // Base name must be six characters or less for short file names.
-
 const uint8_t CS_PIN = 4;       // CS pin of SD card module
-
 File file;
-
 const uint8_t BASE_NAME_SIZE = sizeof(FILE_BASE_NAME) - 1;
 char fileName[] = FILE_BASE_NAME "00.txt";
-
-void setup() {
+//------------------------------------------------------------------------------
+void setup()
+{
   Serial.begin(9600);
   airqualitysensor.init(airQualityPin);
-  
-  if (!SD.begin(CS_PIN)) {                 // Initializing SD card module
+
+  if (!SD.begin(CS_PIN))
+  {                 // Initializing SD card module
     Serial.println(F("begin failed"));
     return;
   }
@@ -50,9 +51,9 @@ void setup() {
   Serial.println(fileName);                           // for data to be logged to
   file.close();
 }
-
-
-void loop() {
+//------------------------------------------------------------------------------
+void loop()
+{
   int a;
   a = analogRead(A0);
   Serial.println("now the Air quality sensor is :");
@@ -83,3 +84,4 @@ void loop() {
     delay(3000);                              // Wait 3000ms before taking another reading
   }
 }
+//------------------------------------------------------------------------------
