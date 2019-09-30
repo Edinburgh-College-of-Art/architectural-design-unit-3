@@ -17,132 +17,82 @@
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-#include "Arduino.h"
-#include "AirQuality.h"
+ */
+#include "Air_Quality_Sensor.h"
 
-//Get the avg voltage in 5 minutes.
+const int AirQualitySensor::FORCE_SIGNAL   = 0;
+const int AirQualitySensor::HIGH_POLLUTION = 1;
+const int AirQualitySensor::LOW_POLLUTION  = 2;
+const int AirQualitySensor::FRESH_AIR      = 3;
 
-void AirQuality::avgVoltage()
+AirQualitySensor::AirQualitySensor(int pin)
+    : _pin(pin), _voltageSum(0), _volSumCount(0)
 {
-  if (i == 150) //sum 5 minutes
-  {
-    vol_standard = temp / 150;
-    temp = 0;
-    Serial.print("Vol_standard in 5 minutes:");
-    Serial.println(vol_standard);
-    i = 0;
-  }
-  else
-  {
-    temp += first_vol;
-    i++;
-  }
+    // do nothing
 }
-void AirQuality::init(int pin)
+
+bool AirQualitySensor::init(void)
 {
-  _pin = pin;
-  pinMode(_pin, INPUT);
-  unsigned char i = 0;
+    int initVoltage = analogRead(_pin);
 
-  uint32_t startTime = millis();
-  while (startTime - millis() < 3000)
-  {
-  }
-
-  Serial.println("Warming Up Air Quality Sensor...");
-
-  uint8_t previousProgress = 0;
-  startTime = millis();
-  while (startTime - millis() < warmUpTime)
-  {
-    uint8_t progress = (startTime - millis()) / 1000;
-    if (progress != previousProgress)
+    if (10 < initVoltage && initVoltage < 798)
     {
-      previousProgress = progress;
-      Serial.print((warmUpTime / 1000) - progress);
-      Serial.print(" seconds left");
-    }
-  }
+        _currentVoltage = initVoltage;
+        _lastVoltage = _currentVoltage;
 
-  init_voltage = analogRead(_pin);
+        _standardVoltage = initVoltage;
+        _lastStdVolUpdated = millis();
 
-  Serial.println("The init voltage is ...");
-  Serial.println(init_voltage);
-  while (init_voltage)
-  {
-    if (init_voltage < 798 && init_voltage > 10) // the init voltage is ok
-    {
-      first_vol = analogRead(A0); //initialize first value
-      last_vol = first_vol;
-      vol_standard = last_vol;
-      Serial.println("Sensor ready.");
-      error = false;;
-      break;
+        return true;
     }
-    else if (init_voltage > 798 || init_voltage <= 10)
-    {
-      i++;
-      Serial.println("waitting sensor init..(it takes 60 seconds to init)");
-      delay(60000);//60000
-      init_voltage = analogRead(A0);
-      if (i == 5)
-      {
-        i = 0;
-        error = true;
-        Serial.println("Sensor Error!");
-      }
+    else {
+        return false;
     }
-    else
-      break;
-  }
-  //init the timer
-  TCCR1A = 0; //normal model
-  TCCR1B = 0x02; //set clock as 8*(1/16M)
-  TIMSK1 = 0x01; //enable overflow interrupt
-  Serial.println("Test begin...");
-  sei();
 }
-int AirQuality::slope(void)
-{
-  while (timer_index)
-  {
-    if (first_vol - last_vol > 400 || first_vol > 700)
-    {
-      Serial.println("High pollution! Force signal active.");
-      timer_index = 0;
-      avgVoltage();
-      return 0;
-    }
-    else if ((first_vol - last_vol > 400 && first_vol < 700) || first_vol - vol_standard > 150)
-    {
-      Serial.print("sensor_value:");
-      Serial.print(first_vol);
-      Serial.println("\t High pollution!");
-      timer_index = 0;
-      avgVoltage();
-      return 1;
 
-    }
-    else if ((first_vol - last_vol > 200 && first_vol < 700) || first_vol - vol_standard > 50)
+int AirQualitySensor::slope(void)
+{
+    _lastVoltage = _currentVoltage;
+    _currentVoltage = analogRead(_pin);
+
+    _voltageSum += _currentVoltage;
+    _volSumCount += 1;
+
+    updateStandardVoltage();
+    if (_currentVoltage - _lastVoltage > 400 || _currentVoltage > 700)
     {
-      //Serial.println(first_vol-last_vol);
-      Serial.print("sensor_value:");
-      Serial.print(first_vol);
-      Serial.println("\t Low pollution!");
-      timer_index = 0;
-      avgVoltage();
-      return 2;
+        return AirQualitySensor::FORCE_SIGNAL;
     }
-    else
+    else if ((_currentVoltage - _lastVoltage > 400 && _currentVoltage < 700)
+             || _currentVoltage - _standardVoltage > 150)
     {
-      avgVoltage();
-      Serial.print("sensor_value:");
-      Serial.print(first_vol);
-      Serial.println("\t Air fresh");
-      timer_index = 0;
-      return 3;
+        return AirQualitySensor::HIGH_POLLUTION;
     }
-  }
-  return -1;
+    else if ((_currentVoltage - _lastVoltage > 200 && _currentVoltage < 700)
+             || _currentVoltage - _standardVoltage > 50)
+    {
+        return AirQualitySensor::LOW_POLLUTION;
+    }
+    else {
+        return AirQualitySensor::FRESH_AIR;
+    }
+
+    return -1;
+}
+
+int AirQualitySensor::getValue(void)
+{
+    return _currentVoltage;
+}
+
+void AirQualitySensor::updateStandardVoltage(void)
+{
+    if (millis() - _lastStdVolUpdated > 500000)
+    {
+        _standardVoltage = _voltageSum / _volSumCount;
+        _lastStdVolUpdated = millis();
+
+        _voltageSum = 0;
+        _volSumCount = 0;
+    }
 }
