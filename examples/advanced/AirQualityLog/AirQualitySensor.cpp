@@ -18,19 +18,20 @@
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+//------------------------------------------------------------------------------
 #include "AirQualitySensor.h"
-
+//------------------------------------------------------------------------------
 const int AirQualitySensor::FORCE_SIGNAL   = 0;
 const int AirQualitySensor::HIGH_POLLUTION = 1;
 const int AirQualitySensor::LOW_POLLUTION  = 2;
 const int AirQualitySensor::FRESH_AIR      = 3;
-
+//------------------------------------------------------------------------------
 AirQualitySensor::AirQualitySensor(int pin)
     : _pin(pin), _voltageSum(0), _volSumCount(0)
 {
     // do nothing
 }
-
+//------------------------------------------------------------------------------
 bool AirQualitySensor::init(void)
 {
     int initVoltage = analogRead(_pin);
@@ -49,7 +50,7 @@ bool AirQualitySensor::init(void)
         return false;
     }
 }
-
+//------------------------------------------------------------------------------
 int AirQualitySensor::slope(void)
 {
     _lastVoltage = _currentVoltage;
@@ -79,12 +80,12 @@ int AirQualitySensor::slope(void)
 
     return -1;
 }
-
+//------------------------------------------------------------------------------
 int AirQualitySensor::getValue(void)
 {
     return _currentVoltage;
 }
-
+//------------------------------------------------------------------------------
 void AirQualitySensor::updateStandardVoltage(void)
 {
     if (millis() - _lastStdVolUpdated > 500000)
@@ -96,3 +97,4 @@ void AirQualitySensor::updateStandardVoltage(void)
         _volSumCount = 0;
     }
 }
+//------------------------------------------------------------------------------
