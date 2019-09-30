@@ -3,14 +3,14 @@
    This code is in the public domain.
 */
 //------------------------------------------------------------------------------
-#include"AirQuality.h"
+#include"AirQualitySensor.h"
 #include"Arduino.h"
 #include <SPI.h>
 #include <SD.h>
 #include <DS3231.h>
 //------------------------------------------------------------------------------
-AirQuality airqualitysensor;
 const int airQualityPin = A0;      // Analog input pin that the LDR is attached to
+AirQualitySensor airqualitysensor(airQualityPin);
 //------------------------------------------------------------------------------
 DS3231 rtc(SDA, SCL);
 //------------------------------------------------------------------------------
@@ -23,7 +23,7 @@ char fileName[] = FILE_BASE_NAME "00.txt";
 void setup()
 {
   Serial.begin(9600);
-  airqualitysensor.init(airQualityPin);
+  airqualitysensor.init();
 
   if (!SD.begin(CS_PIN))
   {                 // Initializing SD card module
@@ -54,10 +54,10 @@ void setup()
 //------------------------------------------------------------------------------
 void loop()
 {
-  int a;
-  a = analogRead(A0);
+  airqualitysensor.slope();
+  int airQuality = airqualitysensor.getValue();
   Serial.println("now the Air quality sensor is :");
-  Serial.println(a);
+  Serial.println(airQuality);
   delay(500);
 
   file = SD.open(fileName, FILE_WRITE);
@@ -68,19 +68,15 @@ void loop()
     Serial.print(",");                        // Print a comma
     Serial.print(int(rtc.getTemp()));         // Print the temperature
     Serial.print(",");                        // Print a comma
-    Serial.println(analogRead(airQualityPin));  // Print reading from LDR
+    Serial.println(airQuality);  // Print reading from LDR
 
 
     file.print(rtc.getTimeStr());             // Write the time to .txt file
     file.print(",");                          // Write a comma
     file.print(int(rtc.getTemp()));           // Write the temperature to .txt file
     file.print(",");                          // Write a comma
-    file.println(analogRead(airQualityPin));    // Write the LDR reading to .txt file
-    file.close();                             // close the file
-
-    Serial.println(a);
-    file.println(a);
-
+    file.println(airQuality);    // Write the LDR reading to .txt file
+    file.close();                             // close the file    
     delay(3000);                              // Wait 3000ms before taking another reading
   }
 }
