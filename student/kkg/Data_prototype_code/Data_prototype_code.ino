@@ -11,57 +11,70 @@
 */
 //--------------------------------------------------------------------------------
 #include <LiquidCrystal.h>
+#include <SPI.h>
+#include <SD.h>
 //--------------------------------------------------------------------------------
-const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+const int rs = 9, en = 8, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 //--------------------------------------------------------------------------------
 const int pinAdc = A0; //sound sensor
 //--------------------------------------------------------------------------------
-const int buttonPin = 1;     // the number of the pushbutton pin
-const int ledPin =  13;      // the number of the LED pin
+const int buttonPin = 2;     // the number of the pushbutton pin
+const int ledPin =  10;      // the number of the LED pin
 int buttonState = 0;         // variable for reading the pushbutton status
+bool record = false;
+//--------------------------------------------------------------------------------
+void toggleRecord()
+{
+  record = !record;
+}
 //--------------------------------------------------------------------------------
 void setup()
 {
+  //--------------------------------------------------------------------------------
   Serial.begin(9600);
-  pinMode(ledPin, OUTPUT);  
+  pinMode(ledPin, OUTPUT);
   pinMode(buttonPin, INPUT);
-  
-  lcd.begin(16, 2); // set up the LCD's number of columns and rows:  
+  setupSD();
+  //--------------------------------------------------------------------------------
+  lcd.begin(16, 2); // set up the LCD's number of columns and rows:
   lcd.print("Sound Intensity");
+  //--------------------------------------------------------------------------------
 }
-
+//--------------------------------------------------------------------------------
 void loop()
 {
-  //sound sensor:
-  long sum = 0;
+  //--------------------------------------------------------------------------------
+  long sound = 0;
   for (int i = 0; i < 32; i++)
   {
-    sum += analogRead(pinAdc);
+    sound += analogRead(pinAdc);
   }
 
-  sum >>= 5;
-
-  Serial.println(sum);
+  sound >>= 5;
+  //--------------------------------------------------------------------------------
+  Serial.println(sound);
   delay(100);
-
-  //push button
-  // read the state of the pushbutton value:
-  buttonState = digitalRead(buttonPin);
-  // check if the pushbutton is pressed.
-  // if it is, the buttonState is HIGH:
-  if (buttonState = HIGH) {
-    // turn LED on:
+  //--------------------------------------------------------------------------------
+  if (record)
+  {
     digitalWrite(ledPin, HIGH);
-  } else {
-    // turn LED off:
+    File myFile = SD.open("data.txt", FILE_WRITE); //8 characters max
+    if (myFile)
+    {
+      myFile.println(sound); // Write the time to .txt file
+      myFile.close();        // close the file
+    }
+    else
+    {
+      Serial.println("error opening data.txt");
+    }
+  }
+  else
+  {
     digitalWrite(ledPin, LOW);
   }
-
-  //the LCD screen
-  // set the cursor to column 0, line 1
-  // (note: line 1 is the second row, since counting begins with 0):
+  //--------------------------------------------------------------------------------
   lcd.setCursor(0, 1);
-  lcd.print(analogRead(pinAdc)); //prints value of the sound sensor
-
+  lcd.print(sound); //prints value of the sound sensor
 }
