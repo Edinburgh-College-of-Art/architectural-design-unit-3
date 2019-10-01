@@ -12,14 +12,21 @@
 #include <SD.h>
 //--------------------------------------------------------
 int LED = 12;
-int BUTTON = 4;
+int BUTTON = 2;
 int pinAdc = A0;
+bool record = false;
+//--------------------------------------------------------
+void toggleRecord() {
+  record = !record;
+}
 //--------------------------------------------------------
 void setup()
 {
   Serial.begin(9600);
   pinMode(LED, OUTPUT);
   pinMode(BUTTON, INPUT);
+  setupSD();
+  attachInterrupt(digitalPinToInterrupt(BUTTON), toggleRecord, RISING);
 }
 //--------------------------------------------------------
 void loop()
@@ -34,24 +41,28 @@ void loop()
   sound /= 30;
   Serial.println(sound);
   //--------------------------------------------------------
-  if (digitalRead(BUTTON) == HIGH)
+
+  if (record)
   {
     digitalWrite(LED, HIGH);
     File myFile = SD.open("data.txt", FILE_WRITE); //8 characters max
     if (myFile)
     {
       myFile.println(sound); // Write the time to .txt file
-//      myFile.print(",");   // Write a comma
       myFile.close();        // close the file
     }
     else
     {
-      digitalWrite(LED, LOW);
-      Serial.println("error opening temperaturetest.txt");
+      Serial.println("error opening data.txt");
     }
+  }
+  else
+  {
     digitalWrite(LED, LOW);
   }
   //--------------------------------------------------------
 }
+//--------------------------------------------------------
+
 //--------------------------------------------------------
 // EOF
