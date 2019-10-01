@@ -11,12 +11,13 @@
 #include <SPI.h>
 #include <SD.h>
 //--------------------------------------------------------
-int LED = 12;
+int LED = 9;
 int BUTTON = 2;
 int pinAdc = A0;
 bool record = false;
 //--------------------------------------------------------
-void toggleRecord() {
+void toggleRecord() 
+{
   record = !record;
 }
 //--------------------------------------------------------
