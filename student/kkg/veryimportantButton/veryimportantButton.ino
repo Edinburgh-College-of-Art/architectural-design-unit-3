@@ -1,5 +1,5 @@
 /*
-    What it does
+    Record sound loudness to SD Card
 
     Pins
 
