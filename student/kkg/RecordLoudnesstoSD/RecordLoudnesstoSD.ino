@@ -17,6 +17,7 @@ int pinAdc = A0;
 //--------------------------------------------------------
 void setup()
 {
+  Serial.begin(9600);
   pinMode(LED, OUTPUT);
   pinMode(BUTTON, INPUT);
 }
